@@ -2,7 +2,7 @@
   "name": "wonkycalc",
   "version": "2.0.0",
   "private": true,
-  "description": "One scientific calculator. Thirteen languages. Absolutely necessary.",
+  "description": "Thirteen languages. Every calculation rebuilds three workers and takes the full scenic route.",
   "type": "module",
   "scripts": {
     "start": "node server.mjs",

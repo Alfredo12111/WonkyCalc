@@ -28,7 +28,12 @@ test("HTTP boundary and live NDJSON trace", async () => {
     assert.ok(ready, "Test server must start");
     const page = await fetch(base);
     assert.equal(page.status, 200);
-    assert.match(await page.text(), /WonkyCalc/);
+    const html = await page.text();
+    assert.match(html, /WonkyCalc/);
+    assert.doesNotMatch(
+      html,
+      /type="checkbox"|id="(?:homework|per-operation|unnecessary)"/,
+    );
     const request = (body, headers = {}) =>
       fetch(`${base}/api/calculate`, {
         method: "POST",
@@ -56,11 +61,12 @@ test("HTTP boundary and live NDJSON trace", async () => {
     assert.match(response.headers.get("content-type"), /ndjson/);
     const events = (await response.text()).trim().split("\n").map(JSON.parse);
     assert.equal(
-      events.filter((e) => e.status === "running").length,
+      events.filter((e) => e.type === "stage" && e.status === "running").length,
       events.at(-1).receipt.processes,
     );
     assert.equal(
-      events.filter((e) => e.status === "complete").length,
+      events.filter((e) => e.type === "stage" && e.status === "complete")
+        .length,
       events.at(-1).receipt.processes,
     );
     assert.equal(
@@ -69,6 +75,11 @@ test("HTTP boundary and live NDJSON trace", async () => {
     );
     assert.equal(events.at(-1).type, "result");
     assert.equal(events.at(-1).raw, "13");
+    assert.deepEqual(
+      events.filter((e) => e.type === "build").map((e) => e.status),
+      ["running", "complete"],
+    );
+    assert.ok(events.at(-1).receipt.buildMs > 0);
   } finally {
     child.kill();
     await new Promise((resolve) => {

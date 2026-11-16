@@ -27,9 +27,9 @@ export const runtimes = {
   factor: resolve("factor", ".runtimes/factor/factor/factor.exe"),
   rexx: resolve("rexx", ".runtimes/rexx/rexx.exe"),
   bqn: resolve("bqn", ".runtimes/bqn/bqn/BQN.exe"),
-  mercury: resolve("mercury", ".cache/bin/units.exe"),
-  eiffel: resolve("eiffel", ".cache/bin/contracts.exe"),
-  icon: resolve("icon", ".cache/bin/explain.exe"),
+  mercury: path.join(ROOT, ".cache/bin/units.exe"),
+  eiffel: path.join(ROOT, ".cache/bin/contracts.exe"),
+  icon: path.join(ROOT, ".cache/bin/explain.exe"),
 };
 
 export const stages = [
@@ -61,7 +61,7 @@ export const stages = [
     id: "tcl",
     name: "Tcl",
     role: "Plan",
-    description: "Builds a named execution plan for the numeric engine.",
+    description: "Generates each J program and maps operation dependencies.",
     file: "plan.tcl",
     output: "nodes.tsv",
   },
@@ -77,7 +77,7 @@ export const stages = [
     id: "red",
     name: "Red",
     role: "Format",
-    description: "Rounds the answer to your chosen display precision.",
+    description: "Rounds every result component to your display precision.",
     file: "format.red",
     output: "formatted.txt",
   },
@@ -94,7 +94,7 @@ stages.splice(5, 0, {
   id: "eiffel",
   name: "Eiffel",
   role: "Enforce contracts",
-  description: "Checks shapes, domains and finite results.",
+  description: "Checks every operation before and after execution.",
   file: "contracts/contracts.e",
   output: "contracts.txt",
 });
@@ -113,7 +113,7 @@ stages.splice(
     id: "factor",
     name: "Factor",
     role: "Second opinion",
-    description: "Independently evaluates supported scalar expressions.",
+    description: "Always attempts an independent scalar calculation.",
     file: "check.factor",
     output: "factor.txt",
   },
@@ -121,7 +121,7 @@ stages.splice(
     id: "rexx",
     name: "Rexx",
     role: "Decimal audit",
-    description: "Recomputes supported expressions with 50 decimal digits.",
+    description: "Always attempts a second answer with 50 decimal digits.",
     file: "decimal.rexx",
     output: "rexx.txt",
   },
@@ -136,6 +136,11 @@ stages.push({
 });
 
 export async function health() {
+  const compilers = {
+    mercury: ".runtimes/msys64/opt/mercury/bin/mercury_compile.exe",
+    eiffel: ".runtimes/gobo/gobo/bin/gec.exe",
+    icon: ".runtimes/icon/app/bin/icont.exe",
+  };
   let tcl = false;
   try {
     if (runtimes.tcl) tcl = existsSync(runtimes.tcl);
@@ -152,7 +157,11 @@ export async function health() {
   } catch {}
   return stages.map((s) => ({
     ...s,
-    available: s.id === "tcl" ? tcl : existsSync(runtimes[s.id]),
+    available:
+      s.id === "tcl"
+        ? tcl
+        : existsSync(runtimes[s.id]) &&
+          (!compilers[s.id] || existsSync(path.join(ROOT, compilers[s.id]))),
   }));
 }
 
@@ -169,9 +178,6 @@ export function validateRequest(input) {
     throw new Error("Angle mode must be DEG or RAD.");
   if (![6, 10, 12, 14].includes(input.precision ?? 12))
     throw new Error("Unsupported display precision.");
-  for (const option of ["homework", "perOperation", "unnecessary"])
-    if (input[option] !== undefined && typeof input[option] !== "boolean")
-      throw new Error(`${option} must be true or false.`);
   const ans = String(input.ans ?? "0");
   if (
     !/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(ans) ||
@@ -179,7 +185,7 @@ export function validateRequest(input) {
   )
     throw new Error("Invalid previous answer.");
   return {
-    ...input,
+    expression: input.expression,
     ans,
     mode: input.mode ?? "DEG",
     precision: input.precision ?? 12,

@@ -6,7 +6,7 @@
     <title>WonkyCalc — Thirteen languages. One calculator.</title>
     <meta
       name="description"
-      content="A scientific calculator with twelve native language workers and a Haxe interface. Follow real calculations through the scenic route."
+      content="Thirteen languages, one scientific calculator. Every calculation rebuilds three workers, takes the scenic route, and gets independent checks."
     />
     <link rel="icon" href="/favicon.svg" />
     <link rel="stylesheet" href="/style.css" />
@@ -163,35 +163,7 @@
                 ><span class="keyboard-hint">↵ to calculate</span>
               </div>
             </div>
-            <div
-              class="route-options"
-              aria-label="Unnecessary calculation options"
-            >
-              <label
-                ><input type="checkbox" id="homework" checked /><span
-                  ><b>Check my homework</b
-                  ><small>Factor + 50-digit Rexx second opinions</small></span
-                ></label
-              >
-              <label
-                ><input type="checkbox" id="per-operation" checked /><span
-                  ><b>Take the scenic route</b
-                  ><small
-                    >Eiffel checks before and after every operation</small
-                  ></span
-                ></label
-              >
-              <label
-                ><input type="checkbox" id="unnecessary" /><span
-                  ><b>Absolutely unnecessary</b
-                  ><small
-                    >Recompile Mercury, Eiffel and Icon before
-                    calculating</small
-                  ></span
-                ></label
-              >
-              <p id="build-status" role="status" hidden></p>
-            </div>
+            <p id="build-status" role="status" hidden></p>
             <div class="calculator-foot">
               <span><i></i> Real runtimes. Real calculations.</span
               ><span id="calculation-time">Ready when you are.</span>
@@ -206,8 +178,8 @@
               <span class="live-tag"><i></i> LIVE</span>
             </div>
             <p class="trace-intro">
-              Twelve native workers. A Haxe interface. Every detour accounted
-              for.
+              Twelve native workers. A Haxe interface. Every calculation
+              rebuilds three workers and takes every detour.
             </p>
             <div class="trace-summary">
               <span id="trace-label">Waiting for an expression</span
@@ -306,9 +278,11 @@
       <p>
         Type expressions normally, then press <strong>Enter</strong> or
         <strong>=</strong>. Twelve native workers take your expression on a
-        trip; Haxe runs the interface. Open a language row, operation graph, or
-        receipt to inspect what actually happened. Switching homework off skips
-        Factor and Rexx.
+        trip; Haxe runs the interface. Every calculation first rebuilds Mercury,
+        Eiffel and Icon. Each operation gets Eiffel checks before and after, and
+        Factor and Rexx always attempt independent checks. Open a language row,
+        operation graph, or receipt to inspect what actually happened. The extra
+        work is automatic, so even simple sums take a while.
       </p>
       <dl>
         <dt>Scientific</dt>
@@ -367,7 +341,7 @@
         </dd>
         <dt>The independent opinions</dt>
         <dd>
-          Factor and Rexx each read Raku's instruction stream independently.
+          Factor and Rexx always read Raku's instruction stream independently.
           Unsupported functions are labelled, never silently borrowed from J.
           Rexx uses 50 decimal digits for its supported arithmetic; repeating
           fractions are still rounded. Its difference from J is shown as a
@@ -377,10 +351,11 @@
         <dd>
           Worker launches count direct worker process invocations, including the
           Python host for Tcl. Payload bytes count worker input and output data
-          files, excluding source files. Numeric time is measured inside J/BQN;
-          the remaining worker time includes startup, file I/O and independent
-          checks. Rebuilding is timed separately; compiler subprocesses are not
-          included in the worker count.
+          files, including generated J plans and excluding installed worker
+          source. Numeric time is measured inside J/BQN; the remaining worker
+          time includes startup, file I/O and independent checks. Rebuilding is
+          timed separately; compiler subprocesses are not included in the worker
+          count.
         </dd>
       </dl>
     </dialog>

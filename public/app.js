@@ -108,7 +108,7 @@ class Main {
 	static resetTrace() {
 		Main.completed = new haxe_ds_StringMap();
 		Main.renderLanguages();
-		Main.expected = Main.q("#homework").checked ? 12 : 10;
+		Main.expected = 12;
 		Main.text("#trace-count","0 / " + Main.expected);
 		Main.q("#trace-progress").style.width = "0%";
 		Main.text("#trace-label","Taking the scenic route…");
@@ -128,9 +128,8 @@ class Main {
 		row.classList.remove("running");
 		row.classList.remove("complete");
 		row.classList.remove("error");
-		row.classList.remove("skipped");
 		row.classList.add(e.status);
-		let tmp = e.status == "running" ? "" : e.status == "complete" ? "✓" : e.status == "skipped" ? "—" : "!";
+		let tmp = e.status == "running" ? "" : e.status == "complete" ? "✓" : "!";
 		row.querySelector(".language-state").textContent = tmp;
 		if(e.ms != null) {
 			let tmp = e.calls > 1 ? Std.string(e.calls) + "× · " : "";
@@ -214,7 +213,7 @@ class Main {
 		Main.busy = v;
 		Main.q("#expression").readOnly = v;
 		let _g = 0;
-		let _g1 = Main.all(".key-area button,.angle-control button,.example-list button,.history-entry,#precision,.route-options input");
+		let _g1 = Main.all(".key-area button,.angle-control button,.example-list button,.history-entry,#precision");
 		while(_g < _g1.length) _g1[_g++].disabled = v;
 		Main.text("#calculate",v ? "…" : "=");
 		Main.text("#expression-label",v ? "THE COMMITTEE IS ON IT" : "YOUR EXPRESSION");
@@ -266,10 +265,7 @@ class Main {
 		Main.q("#memory-indicator").title = tmp;
 	}
 	static renderHomework(h) {
-		Main.q("#homework-results").hidden = !h.enabled;
-		if(!h.enabled) {
-			return;
-		}
+		Main.q("#homework-results").hidden = false;
 		let rows = "<div><b>J / BQN</b><code>" + Main.esc(h.j) + "</code></div>";
 		let v = Reflect.field(h,"factor");
 		rows += "<div><b>" + "Factor" + "</b><code class=\"" + (v.status == "ok" ? "" : "unsupported") + "\">" + (v.status == "ok" ? Main.esc(v.result) : "Not supported: " + Main.esc(v.result)) + "</code></div>";
@@ -308,7 +304,8 @@ class Main {
 		Main.resetTrace();
 		Main.setBusy(true);
 		Main.answer("…");
-		Main.text("#input-hint","Working through the language pipeline…");
+		Main.text("#input-hint","Rebuilding three workers, then taking every detour…");
+		Main.text("#calculation-time","Rebuild and calculation in progress…");
 		let fail = function(error) {
 			Main.answer("Something doesn’t add up",true);
 			let message = error.message != null ? Std.string(error.message) : Std.string(error);
@@ -325,6 +322,7 @@ class Main {
 			case "build":
 				Main.q("#build-status").hidden = false;
 				Main.text("#build-status",Std.string(e.message) + (e.ms != null ? " " + Main.seconds(e.ms) : ""));
+				Main.text("#trace-label",e.status == "running" ? "Rebuilding three workers…" : "Starting twelve workers…");
 				break;
 			case "error":
 				throw new haxe_Exception(e.message);
@@ -388,7 +386,7 @@ class Main {
 				break;
 			}
 		};
-		let request = { expression : source, mode : Main.mode, precision : Std.parseInt(Main.q("#precision").value), ans : Main.lastRaw, homework : Main.q("#homework").checked, perOperation : Main.q("#per-operation").checked, unnecessary : Main.q("#unnecessary").checked};
+		let request = { expression : source, mode : Main.mode, precision : Std.parseInt(Main.q("#precision").value), ans : Main.lastRaw};
 		let fetch = window.fetch("/api/calculate",{ method : "POST", headers : { "Content-Type" : "application/json"}, body : JSON.stringify(request)});
 		fetch.then(function(response) {
 			if(!response.ok) {

@@ -66,7 +66,8 @@ for (const [expression, expected, mode = "DEG", ans = "0"] of cases) {
       stages.map((s) => s.id).sort(),
     );
     assert.equal(
-      events.filter((e) => e.status === "complete").length,
+      events.filter((e) => e.type === "stage" && e.status === "complete")
+        .length,
       result.receipt.processes,
     );
     assert.ok(

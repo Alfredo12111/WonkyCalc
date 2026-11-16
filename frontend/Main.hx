@@ -92,7 +92,7 @@ class Main {
 	static function resetTrace() {
 		completed = new Map();
 		renderLanguages();
-		expected = q("#homework").checked ? 12 : 10;
+		expected = 12;
 		text("#trace-count", '0 / $expected');
 		q("#trace-progress").style.width = "0%";
 		text("#trace-label", "Taking the scenic route…");
@@ -109,10 +109,10 @@ class Main {
 		var row = q('.language[data-id="${e.id}"]');
 		if (row == null)
 			return;
-		for (s in ["running", "complete", "error", "skipped"])
+		for (s in ["running", "complete", "error"])
 			row.classList.remove(s);
 		row.classList.add(e.status);
-		row.querySelector(".language-state").textContent = e.status == "running" ? "" : e.status == "complete" ? "✓" : e.status == "skipped" ? "—" : "!";
+		row.querySelector(".language-state").textContent = e.status == "running" ? "" : e.status == "complete" ? "✓" : "!";
 		if (e.ms != null)
 			row.querySelector(".language-time")
 				.textContent = (e.calls > 1 ? e.calls + "× · " : "") + (e.ms >= 1000 ? seconds(e.ms) : Math.round(e.ms) + " ms");
@@ -176,7 +176,7 @@ class Main {
 	static function setBusy(v:Bool) {
 		busy = v;
 		q("#expression").readOnly = v;
-		for (b in all(".key-area button,.angle-control button,.example-list button,.history-entry,#precision,.route-options input"))
+		for (b in all(".key-area button,.angle-control button,.example-list button,.history-entry,#precision"))
 			b.disabled = v;
 		text("#calculate", v ? "…" : "=");
 		text("#expression-label", v ? "THE COMMITTEE IS ON IT" : "YOUR EXPRESSION");
@@ -261,9 +261,7 @@ class Main {
 	}
 
 	static function renderHomework(h:Dynamic) {
-		q("#homework-results").hidden = !h.enabled;
-		if (!h.enabled)
-			return;
+		q("#homework-results").hidden = false;
 		var rows = '<div><b>J / BQN</b><code>${esc(h.j)}</code></div>';
 		for (name in ["factor", "rexx"]) {
 			var v:Dynamic = Reflect.field(h, name);
@@ -305,7 +303,8 @@ class Main {
 		resetTrace();
 		setBusy(true);
 		answer("…");
-		text("#input-hint", "Working through the language pipeline…");
+		text("#input-hint", "Rebuilding three workers, then taking every detour…");
+		text("#calculation-time", "Rebuild and calculation in progress…");
 		function fail(error:Dynamic) {
 			answer("Something doesn’t add up", true);
 			var message = error.message != null ? Std.string(error.message) : Std.string(error);
@@ -326,6 +325,7 @@ class Main {
 				case "build":
 					q("#build-status").hidden = false;
 					text("#build-status", e.message + (e.ms != null ? " " + seconds(e.ms) : ""));
+					text("#trace-label", e.status == "running" ? "Rebuilding three workers…" : "Starting twelve workers…");
 				case "node":
 					var row = Browser.document.createElement("div");
 					row.className = "graph-node";
@@ -381,10 +381,7 @@ class Main {
 			expression: source,
 			mode: mode,
 			precision: Std.parseInt(q("#precision").value),
-			ans: lastRaw,
-			homework: q("#homework").checked,
-			perOperation: q("#per-operation").checked,
-			unnecessary: q("#unnecessary").checked
+			ans: lastRaw
 		};
 		var fetch:js.lib.Promise<Dynamic> = cast Browser.window.fetch("/api/calculate",
 			{method: "POST", headers: {"Content-Type": "application/json"}, body: Json.stringify(request)});

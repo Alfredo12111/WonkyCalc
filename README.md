@@ -2,7 +2,7 @@
 
 **Thirteen languages. One calculator. Absolutely necessary.**
 
-A scientific calculator with twelve native language workers and a browser interface written in **Haxe**. It handles scientific functions, statistics, vectors, matrices and units. The scenic-route sidebar shows real worker activity, intermediate output, operation dependencies and the overhead incurred getting an answer.
+A scientific calculator with twelve native language workers and a browser interface written in **Haxe**. It handles scientific functions, statistics, vectors, matrices and units. Every calculation rebuilds three workers, checks each operation and requests independent answers. The scenic-route sidebar shows real worker activity, intermediate output, operation dependencies and the overhead incurred getting an answer.
 
 ![WonkyCalc and its scenic-route sidebar](docs/wonkycalc.jpg)
 
@@ -50,13 +50,15 @@ The primary result uses real floating-point arithmetic, approximately 15–16 si
 
 Attaching a unit to an already dimensioned quantity is rejected. Unit-bearing powers need a literal integer exponent from −32 to 32; roots must leave integer unit exponents, and intermediate unit exponents stay within ±1,024. Scientific functions on arrays are limited to the array operations listed above. Complex arithmetic, symbolic algebra, plotting and affine temperature units are outside this version.
 
-## Turn up the bureaucracy
+## The bureaucracy is always on
 
-**Check my homework** runs Factor and Rexx independently on Raku's instruction stream. Factor covers basic arithmetic, powers, square roots, rounding bounds, sums/means/min/max and unit scaling. Rexx covers decimal arithmetic, integer powers, factorials, rounding, sums/means/min/max and unit scaling with `NUMERIC DIGITS 50`. Unsupported functions, matrices and transcendental constants are explicitly labelled. Neither checker borrows J's answer; Rexx reads it only after computing its own answer, to report the difference. Fifty decimal digits do not make repeating fractions exact.
+**Independent checks:** Factor and Rexx always run independently on Raku's instruction stream. Factor covers basic arithmetic, powers, square roots, rounding bounds, sums/means/min/max and unit scaling. Rexx covers decimal arithmetic, integer powers, factorials, rounding, sums/means/min/max and unit scaling with `NUMERIC DIGITS 50`. Unsupported functions, matrices and transcendental constants are explicitly labelled. Neither checker borrows J's answer; Rexx reads it only after computing its own answer, to report the difference. Fifty decimal digits do not make repeating fractions exact.
 
-**Take the scenic route** launches Eiffel before and after every operation. Every numerical operation already gets a fresh J or BQN process. Switching scenic mode off keeps required array checks and final result validation, but removes extra scalar contracts.
+**The scenic route:** Eiffel checks every operation before and after execution, then validates the final result. Every numerical operation gets a fresh J or BQN process.
 
-**Absolutely unnecessary** recompiles the Mercury, Eiffel and Icon workers into an isolated directory before each calculation. The interface reports real compilation time. It does not reinstall or rebuild language compilers.
+**Fresh compilation:** Mercury, Eiffel and Icon are rebuilt from source into an isolated directory before every calculation, including recalculations and memory arithmetic. The interface reports real compilation time. The language compilers themselves are installed during setup and reused.
+
+These behaviors are mandatory in both the interface and the calculation API. Old `homework`, `perOperation` and `unnecessary` request flags are ignored. Even a simple sum can take tens of seconds; its receipt shows where that time went. Failed expressions stop at the worker that rejects them and do not claim to have visited all twelve.
 
 The expandable graph connects operands to operations and links each result to its recorded handoff. Download the JSON receipt to inspect the complete graph, outputs, timings and independent answers.
 
@@ -104,7 +106,7 @@ The sidebar's twelve engines are runtime workers. Haxe is the thirteenth source 
 
 ## Reading the receipt
 
-- **Languages ran:** unique workers actually invoked. Disabling homework skips Factor/Rexx, giving ten.
+- **Languages ran:** unique workers actually invoked. Every completed calculation runs all twelve, including checkers that report an unsupported operation.
 - **Worker launches:** direct worker invocations, including Python hosting Tcl. Compiler processes and their children are excluded.
 - **Payload bytes:** declared worker input/output files, including generated J plans and excluding installed worker source and OS overhead. Repeated handoffs count repeated transfers.
 - **Numeric time:** measured inside J/BQN evaluation. Other worker time includes startup, I/O, contracts, cross-checks, formatting and explanations; it is not a pure OS startup measurement.
@@ -122,7 +124,9 @@ npm test         # Scientific, array, unit, contract, transport and isolation te
 
 Each calculation gets an isolated temporary directory, cleaned on success or failure. User text is parsed as data; numerical worker code uses whitelisted operations and validated literals. Workers run without user-controlled shell interpolation, have timeouts and are cancelled on disconnect. The server binds to loopback, checks Host/Origin, limits input size and permits three simultaneous calculations. It is a local application.
 
-Custom executables can be set in ignored `runtime.local.json`, with keys `rebol`, `raku`, `prolog`, `tcl`, `python`, `j`, `red`, `factor`, `rexx`, `bqn`, `mercury`, `eiffel`, `icon`, or matching `WONKYCALC_*` environment variables. The last three point to compiled project workers, not compilers. Unnecessary mode uses the project-local toolchains. Set `PORT` to change the port.
+Interpreter executables can be set in ignored `runtime.local.json`, with keys `rebol`, `raku`, `prolog`, `tcl`, `python`, `j`, `red`, `factor`, `rexx`, `bqn`, or matching `WONKYCALC_*` environment variables. Mercury, Eiffel and Icon always use fresh project workers built with the project-local toolchains. Keep those toolchains installed after setup. Set `PORT` to change the port.
+
+The integration suite also rebuilds workers for every calculation, so a full `npm test` run is deliberately slow.
 
 Use Jsoftware's `jconsole`, not Java's unrelated program. Mercury's `mmc` also shares its name with Windows Management Console; scripts select the project-local compiler. Other operating systems are not verified.
 

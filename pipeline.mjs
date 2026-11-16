@@ -200,12 +200,12 @@ export async function journey(input, onEvent = () => {}, signal) {
       "context.txt",
       `${request.mode}\n${request.ans}\n${request.precision}\n`,
     );
-    onEvent({ type: "route", expected: request.homework === false ? 10 : 12 });
-    if (request.unnecessary) {
+    onEvent({ type: "route", expected: 12 });
+    {
       onEvent({
         type: "build",
         status: "running",
-        message: "Compiling the calculator to calculate.",
+        message: "Rebuilding Mercury, Eiffel and Icon before this calculation…",
       });
       const at = performance.now();
       await runProcess(
@@ -315,7 +315,7 @@ export async function journey(input, onEvent = () => {}, signal) {
           ["array", "dot", "matmul", "det", "transpose", "norm"].includes(
             node.op,
           );
-        if (request.perOperation !== false || arrays) {
+        {
           const c = await check(node.op, args, parents);
           parents = [c.key];
         }
@@ -327,7 +327,7 @@ export async function journey(input, onEvent = () => {}, signal) {
               node.refs.map((id) => `value${id}.txt`),
               parents,
             );
-        if (request.perOperation !== false) {
+        {
           const c = await check("result", [result.value], [result.key]);
           result.key = c.key;
         }
@@ -367,46 +367,31 @@ export async function journey(input, onEvent = () => {}, signal) {
     await check("final result", [value], [finalParent]);
     const raw = bracket(value);
     await write("result.txt", value.shape.length ? raw : value.values[0]);
-    let homework = {
-      enabled: request.homework !== false,
-      j: raw,
-      factor: null,
-      rexx: null,
+    const factor = await run(
+      "factor",
+      "Independent scalar evaluation",
+      ["-no-user-init", "check.factor"],
+      "factor.txt",
+      ["tokens.txt", "context.txt"],
+      [parsed],
+    );
+    const decimal = await run(
+      "rexx",
+      "50-digit decimal evaluation",
+      ["decimal.rexx"],
+      "rexx.txt",
+      ["tokens.txt", "context.txt", "result.txt"],
+      [parsed, finalParent],
+    );
+    const decode = (text) => {
+      const [status, result, delta] = text.split(/\r?\n/);
+      return { status, result, delta };
     };
-    if (homework.enabled) {
-      const factor = await run(
-        "factor",
-        "Independent scalar evaluation",
-        ["-no-user-init", "check.factor"],
-        "factor.txt",
-        ["tokens.txt", "context.txt"],
-        [parsed],
-      );
-      const decimal = await run(
-        "rexx",
-        "50-digit decimal evaluation",
-        ["decimal.rexx"],
-        "rexx.txt",
-        ["tokens.txt", "context.txt", "result.txt"],
-        [parsed, finalParent],
-      );
-      const decode = (text) => {
-        const [status, result, delta] = text.split(/\r?\n/);
-        return { status, result, delta };
-      };
-      homework = {
-        ...homework,
-        factor: decode(factor.text),
-        rexx: decode(decimal.text),
-      };
-    } else
-      for (const id of ["factor", "rexx"])
-        onEvent({
-          type: "stage",
-          id,
-          status: "skipped",
-          message: "Check my homework is switched off.",
-        });
+    const homework = {
+      j: raw,
+      factor: decode(factor.text),
+      rexx: decode(decimal.text),
+    };
     const formatted = [];
     for (const v of value.values) {
       await write("result.txt", v);
@@ -458,7 +443,7 @@ export async function journey(input, onEvent = () => {}, signal) {
         numericMs: Math.round(numericMs * 100) / 100,
         overheadMs: Math.round(Math.max(0, workerMs - numericMs)),
         buildMs: Math.round(buildMs),
-        compiled: request.unnecessary ? ["Mercury", "Eiffel", "Icon"] : [],
+        compiled: ["Mercury", "Eiffel", "Icon"],
       },
     };
   } catch (error) {

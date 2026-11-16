@@ -91,27 +91,26 @@ test("Independent decimal calculation exposes a real rounding difference", async
   assert.match(r.explanation, /J: add/);
   assert.match(r.explanation, /Factor/);
 });
-test("Unrequested checks are skipped truthfully and scenic contracts add real launches", async () => {
-  const normal = await calculate({
+test("Legacy false flags cannot disable rebuilding, contracts or independent checks", async () => {
+  const r = await calculate({
     expression: "2+3*4",
     homework: false,
     perOperation: false,
+    unnecessary: false,
   });
-  const scenic = await calculate({
-    expression: "2+3*4",
-    homework: false,
-    perOperation: true,
-  });
-  assert.equal(normal.raw, scenic.raw);
-  assert.equal(normal.receipt.languages.length, 10);
-  assert.ok(!normal.trace.some((t) => t.id === "factor" || t.id === "rexx"));
-  assert.ok(scenic.receipt.processes > normal.receipt.processes);
+  assert.equal(r.raw, "14");
+  assert.equal(r.receipt.languages.length, 12);
+  assert.equal(r.trace.find((t) => t.id === "eiffel").calls, 5);
+  assert.equal(r.homework.factor.status, "ok");
+  assert.equal(r.homework.rexx.status, "ok");
+  assert.ok(r.receipt.buildMs > 0);
+  assert.deepEqual(r.receipt.compiled, ["Mercury", "Eiffel", "Icon"]);
 });
 test(
-  "Absolutely unnecessary mode recompiles real native workers",
+  "Every calculation recompiles real native workers by default",
   { timeout: 180000 },
   async () => {
-    const r = await calculate({ expression: "2+2", unnecessary: true });
+    const r = await calculate({ expression: "2+2" });
     assert.equal(r.raw, "4");
     assert.deepEqual(r.receipt.compiled, ["Mercury", "Eiffel", "Icon"]);
     assert.ok(r.receipt.buildMs > 0);
