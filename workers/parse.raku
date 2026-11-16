@@ -9,9 +9,11 @@ grammar Math {
     rule unary { <sign>? <power> }
     token sign { '+' | '-' }
     rule power { <postfix> [ '^' <unary> ]? }
-    rule postfix { <atom> <suffix>* }
+    rule postfix { <atom> <unit>? <suffix>* }
+    token unit { 'seconds' | 'cm' | 'km' | 'ms' | 'kg' | 'm' | 's' | 'g' }
     token suffix { '!' | '%' }
-    rule atom { <number> | <call> | <constant> | '(' <expression> ')' }
+    rule atom { <number> | <call> | <constant> | <array> | '(' <expression> ')' }
+    rule array { '[' <expression>+ % ',' ']' }
     token number { [ \d+ [ '.' \d* ]? | '.' \d+ ] [ <[eE]> <[+\-]>? \d+ ]? }
     rule call { <name> '(' [ <expression>+ % ',' ]? ')' }
     token name { <[a..z]> <[a..z0..9_]>* }
@@ -48,6 +50,7 @@ class Compile {
     }
     method postfix($/) {
         my @out = |$<atom>.made;
+        @out.push('F unit_' ~ $<unit>.Str ~ ' 1') if $<unit>;
         for $<suffix>.list -> $suffix {
             @out.push: 'F ' ~ ($suffix.Str eq '!' ?? 'fact' !! 'percent') ~ ' 1';
         }
@@ -57,12 +60,19 @@ class Compile {
         if $<number> { make ['N ' ~ $<number>.Str] }
         elsif $<call> { make $<call>.made }
         elsif $<constant> { make ['C ' ~ $<constant>.Str] }
+        elsif $<array> { make $<array>.made }
         else { make $<expression>.made }
     }
     method call($/) {
         my @out;
         for $<expression>.list -> $expr { @out.append: |$expr.made }
         @out.push: 'F ' ~ $<name>.Str ~ ' ' ~ $<expression>.elems;
+        make @out;
+    }
+    method array($/) {
+        my @out;
+        for $<expression>.list -> $expr { @out.append: |$expr.made }
+        @out.push: 'F array ' ~ $<expression>.elems;
         make @out;
     }
 }

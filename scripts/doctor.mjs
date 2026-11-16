@@ -13,7 +13,7 @@ if (languages.some((l) => !l.available)) {
       mode: "DEG",
     });
     console.log(
-      `\nSix-language smoke test: ${result.expression} = ${result.result} (${result.ms} ms)`,
+      `\nTwelve-worker smoke test: ${result.expression} = ${result.result} (${result.ms} ms)`,
     );
     if (Math.abs(Number(result.raw) - 1) > 1e-12)
       throw new Error("Numerical smoke test failed.");

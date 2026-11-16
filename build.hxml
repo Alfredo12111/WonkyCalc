@@ -1,0 +1,5 @@
+-cp frontend
+-main Main
+-js public/app.js
+-D js-es=6
+-D analyzer-optimize

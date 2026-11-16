@@ -1,0 +1,15 @@
+# Icon's goal-directed generator walks the actual receipt, one handoff at a time.
+procedure main()
+    local input, output, line, count
+    input := open("journey.txt", "r") | stop("Cannot open the execution receipt")
+    output := open("explanation.txt", "w") | stop("Cannot write explanation")
+    count := 0
+    write(output, "Your answer took the scenic route:")
+    every line := !input do {
+        count +:= 1
+        write(output, right(count, 2), ". ", line)
+    }
+    write(output, "All ", count, " handoffs above were recorded from real worker processes.")
+    close(input)
+    close(output)
+end

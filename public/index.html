@@ -3,10 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>WonkyCalc — Six languages. One answer.</title>
+    <title>WonkyCalc — Thirteen languages. One calculator.</title>
     <meta
       name="description"
-      content="An unnecessarily polyglot scientific calculator, powered by Prolog, Raku, Tcl, Red, J, and Rebol. Watch every calculation happen."
+      content="A scientific calculator with twelve native language workers and a Haxe interface. Follow real calculations through the scenic route."
     />
     <link rel="icon" href="/favicon.svg" />
     <link rel="stylesheet" href="/style.css" />
@@ -18,7 +18,7 @@
         <a class="brand" href="/" aria-label="WonkyCalc home"
           ><img src="/favicon.svg" alt="" width="36" height="36" /><span
             >WonkyCalc<span class="brand-dot">.</span></span
-          ><span class="version">v1.0</span></a
+          ><span class="version">v2.0</span></a
         >
         <div class="top-right">
           <span class="runtime-status" id="runtime-status"
@@ -34,14 +34,14 @@
             <div class="eyebrow"><span></span> UNNECESSARILY POLYGLOT</div>
             <h1>Serious math.<br /><span>Questionable architecture.</span></h1>
             <p>
-              A scientific calculator powered by six languages.<br
+              A scientific calculator powered by thirteen languages.<br
                 class="mobile-break"
               />
               Because one would have been reasonable.
             </p>
           </div>
           <div class="intro-stamp">
-            <span>6</span>
+            <span>13</span>
             <div>LANGUAGES<br />ONE ANSWER</div>
           </div>
         </section>
@@ -96,7 +96,7 @@
                 <span id="input-hint"
                   >Enter an expression or use the keys below</span
                 ><span id="memory-indicator" hidden>M</span
-                ><span class="real-label">REAL NUMBERS</span>
+                ><span class="real-label">REAL NUMBERS · ARRAYS · UNITS</span>
               </div>
             </div>
             <div class="key-area">
@@ -126,7 +126,14 @@
                   aria-selected="false"
                   data-tab="stats"
                 >
-                  Statistics
+                  Statistics</button
+                ><button
+                  role="tab"
+                  id="tab-arrays"
+                  aria-selected="false"
+                  data-tab="arrays"
+                >
+                  Arrays &amp; units
                 </button>
               </div>
               <div
@@ -145,16 +152,45 @@
                   MS</button
                 ><button
                   data-memory="add"
-                  title="Add answer to memory using all six languages"
+                  title="Add the scalar answer to memory through the language pipeline"
                 >
                   M+</button
                 ><button
                   data-memory="subtract"
-                  title="Subtract answer from memory using all six languages"
+                  title="Subtract the scalar answer from memory through the language pipeline"
                 >
                   M−</button
                 ><span class="keyboard-hint">↵ to calculate</span>
               </div>
+            </div>
+            <div
+              class="route-options"
+              aria-label="Unnecessary calculation options"
+            >
+              <label
+                ><input type="checkbox" id="homework" checked /><span
+                  ><b>Check my homework</b
+                  ><small>Factor + 50-digit Rexx second opinions</small></span
+                ></label
+              >
+              <label
+                ><input type="checkbox" id="per-operation" checked /><span
+                  ><b>Take the scenic route</b
+                  ><small
+                    >Eiffel checks before and after every operation</small
+                  ></span
+                ></label
+              >
+              <label
+                ><input type="checkbox" id="unnecessary" /><span
+                  ><b>Absolutely unnecessary</b
+                  ><small
+                    >Recompile Mercury, Eiffel and Icon before
+                    calculating</small
+                  ></span
+                ></label
+              >
+              <p id="build-status" role="status" hidden></p>
             </div>
             <div class="calculator-foot">
               <span><i></i> Real runtimes. Real calculations.</span
@@ -170,14 +206,28 @@
               <span class="live-tag"><i></i> LIVE</span>
             </div>
             <p class="trace-intro">
-              Follow your math through all six languages.
+              Twelve native workers. A Haxe interface. Every detour accounted
+              for.
             </p>
             <div class="trace-summary">
               <span id="trace-label">Waiting for an expression</span
-              ><strong id="trace-count">0 / 6</strong>
+              ><strong id="trace-count">0 / 12</strong>
             </div>
             <div class="trace-progress"><span id="trace-progress"></span></div>
             <div id="language-list" class="language-list"></div>
+            <p class="worker-scroll-hint">
+              Scroll the list to inspect all twelve workers ↓
+            </p>
+            <details class="journey-detail" id="graph-panel">
+              <summary>Explore the operation graph <span>↗</span></summary>
+              <div id="operation-graph">
+                <p>Run an expression to map its detours.</p>
+              </div>
+              <details>
+                <summary>Every process handoff</summary>
+                <ol id="handoff-list"></ol>
+              </details>
+            </details>
             <div class="trace-bottom">
               <span class="route-icon">↳</span>
               <p id="trace-note">
@@ -187,6 +237,28 @@
             </div>
           </aside>
         </div>
+        <section
+          class="receipt-section"
+          id="receipt"
+          hidden
+          aria-label="Calculation receipt"
+        >
+          <div class="section-label">
+            YOUR CALCULATION RECEIPT
+            <button id="download-receipt">Download JSON ↗</button>
+          </div>
+          <div id="receipt-grid" class="receipt-grid"></div>
+          <p id="receipt-timing" class="receipt-timing"></p>
+          <div id="homework-results" class="homework-results" hidden>
+            <h3>Three opinions. Possibly one answer.</h3>
+            <div id="homework-values"></div>
+            <p id="decimal-difference"></p>
+          </div>
+          <details id="explanation-panel" class="journey-detail" hidden>
+            <summary>Icon explains the trip</summary>
+            <pre id="explanation"></pre>
+          </details>
+        </section>
         <section class="bottom-section">
           <div class="examples">
             <div class="section-label">TAKE IT FOR A SPIN <span>↗</span></div>
@@ -194,12 +266,14 @@
               <button data-example="sin(30)^2 + cos(30)^2" data-mode="DEG">
                 <span>Trig identity</span><code>sin(30)² + cos(30)²</code
                 ><b>↗</b></button
-              ><button data-example="ncr(52,5)">
-                <span>Poker possibilities</span><code>ncr(52, 5)</code
+              ><button data-example="det([[1,2],[3,4]])">
+                <span>Matrix bureaucracy</span><code>det([[1,2],[3,4]])</code
                 ><b>↗</b></button
-              ><button data-example="stdev(4,8,15,16,23,42)">
-                <span>A little statistics</span
-                ><code>stdev(4, 8, 15, 16, 23, 42)</code><b>↗</b>
+              ><button data-example="5 m + 30 cm">
+                <span>A measured detour</span><code>5 m + 30 cm</code><b>↗</b>
+              </button>
+              <button data-example="0.1 + 0.2">
+                <span>Ask the committee</span><code>0.1 + 0.2</code><b>↗</b>
               </button>
             </div>
           </div>
@@ -216,8 +290,10 @@
         </section>
       </main>
       <footer>
-        <span>Built with Prolog, Raku, Tcl, Red, J &amp; Rebol.</span
-        ><span>Six languages. One answer. Absolutely necessary.</span>
+        <span
+          >Prolog · Raku · Tcl · Red · J · Rebol · Mercury · Eiffel · BQN ·
+          Factor · Rexx · Icon · Haxe</span
+        ><span>Absolutely necessary.</span>
       </footer>
     </div>
     <div id="toast" role="status" class="toast" hidden></div>
@@ -229,8 +305,10 @@
       <h2>Meet your overqualified calculator.</h2>
       <p>
         Type expressions normally, then press <strong>Enter</strong> or
-        <strong>=</strong>. Every successful calculation really runs through all
-        six languages. Open any completed language row to see what it produced.
+        <strong>=</strong>. Twelve native workers take your expression on a
+        trip; Haxe runs the interface. Open a language row, operation graph, or
+        receipt to inspect what actually happened. Switching homework off skips
+        Factor and Rexx.
       </p>
       <dl>
         <dt>Scientific</dt>
@@ -252,6 +330,18 @@
           <code>variance(1,2,3)</code>. Standard deviation and variance are
           <strong>population</strong> statistics. Maximum 64 arguments.
         </dd>
+        <dt>Arrays &amp; units</dt>
+        <dd>
+          <code>dot([1,2,3],[4,5,6])</code>,
+          <code>matmul([[1,2],[3,4]],[[5,6],[7,8]])</code>,
+          <code>det([[1,2],[3,4]])</code>, <code>transpose</code>,
+          <code>norm</code>, and array sums/means/min/max. Rectangular arrays
+          have at most two dimensions and 256 elements; determinants are at most
+          6×6. Add units with <code>5 m + 30 cm</code> or
+          <code>10 m / 2 s</code>. Supported: m, cm, km, kg, g, s, ms, seconds.
+          Results use metres, kilograms and seconds. Mercury rejects
+          incompatible dimensions.
+        </dd>
         <dt>Small print, actual math</dt>
         <dd>
           Use explicit multiplication: <code>2*pi</code>. Exponents are
@@ -270,9 +360,27 @@
         <dt>Keyboard & memory</dt>
         <dd>
           Enter calculates, Escape clears. <code>ans</code> recalls the
-          full-precision last answer. MS stores it, MR inserts memory, and M+/M−
-          run a new six-language calculation. History and memory stay in this
-          browser.
+          full-precision last dimensionless scalar answer. MS stores it, MR
+          inserts memory, and M+/M− run a new calculation. Array and unit
+          results are available in history and through Copy; they leave scalar
+          memory and Ans unchanged. History and memory stay in this browser.
+        </dd>
+        <dt>The independent opinions</dt>
+        <dd>
+          Factor and Rexx each read Raku's instruction stream independently.
+          Unsupported functions are labelled, never silently borrowed from J.
+          Rexx uses 50 decimal digits for its supported arithmetic; repeating
+          fractions are still rounded. Its difference from J is shown as a
+          decimal string.
+        </dd>
+        <dt>The receipt</dt>
+        <dd>
+          Worker launches count direct worker process invocations, including the
+          Python host for Tcl. Payload bytes count worker input and output data
+          files, excluding source files. Numeric time is measured inside J/BQN;
+          the remaining worker time includes startup, file I/O and independent
+          checks. Rebuilding is timed separately; compiler subprocesses are not
+          included in the worker count.
         </dd>
       </dl>
     </dialog>

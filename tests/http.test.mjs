@@ -55,8 +55,18 @@ test("HTTP boundary and live NDJSON trace", async () => {
     assert.equal(response.status, 200);
     assert.match(response.headers.get("content-type"), /ndjson/);
     const events = (await response.text()).trim().split("\n").map(JSON.parse);
-    assert.equal(events.filter((e) => e.status === "running").length, 6);
-    assert.equal(events.filter((e) => e.status === "complete").length, 6);
+    assert.equal(
+      events.filter((e) => e.status === "running").length,
+      events.at(-1).receipt.processes,
+    );
+    assert.equal(
+      events.filter((e) => e.status === "complete").length,
+      events.at(-1).receipt.processes,
+    );
+    assert.equal(
+      new Set(events.filter((e) => e.type === "handoff").map((e) => e.id)).size,
+      12,
+    );
     assert.equal(events.at(-1).type, "result");
     assert.equal(events.at(-1).raw, "13");
   } finally {

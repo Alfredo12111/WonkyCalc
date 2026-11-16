@@ -55,17 +55,20 @@ const cases = [
   ["170!", 7.257415615307999e306],
 ];
 for (const [expression, expected, mode = "DEG", ans = "0"] of cases) {
-  test(`six real languages: ${expression} (${mode})`, async () => {
+  test(`twelve real workers: ${expression} (${mode})`, async () => {
     const events = [];
     const result = await calculate({ expression, mode, ans }, (e) =>
       events.push(e),
     );
     near(result.raw, expected, expression);
     assert.deepEqual(
-      result.trace.map((t) => t.id),
-      stages.map((s) => s.id),
+      result.trace.map((t) => t.id).sort(),
+      stages.map((s) => s.id).sort(),
     );
-    assert.equal(events.filter((e) => e.status === "complete").length, 6);
+    assert.equal(
+      events.filter((e) => e.status === "complete").length,
+      result.receipt.processes,
+    );
     assert.ok(
       Number.isFinite(Number(result.result)),
       `Display must be finite: ${result.result}`,
@@ -80,13 +83,13 @@ for (const [expression, expected, mode = "DEG", ans = "0"] of cases) {
   });
 }
 const failures = [
-  ["1/0", "j", /zero/],
-  ["sqrt(-1)", "j", /non-negative/],
+  ["1/0", "eiffel", /zero/],
+  ["sqrt(-1)", "eiffel", /non-negative/],
   ["ln(0)", "j", /positive/],
   ["tan(90)", "j", /undefined/],
   ["asin(2)", "j", /between/],
-  ["171!", "j", /170/],
-  ["1.5!", "j", /integer/],
+  ["171!", "eiffel", /170/],
+  ["1.5!", "eiffel", /integer/],
   ["ncr(3,5)", "j", /integers/],
   ["(-2)^0.5", "j", /complex/],
   ["0^0", "j", /undefined/],

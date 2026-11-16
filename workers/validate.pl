@@ -4,9 +4,10 @@
 % Arity is a relation, including bounded variadic statistics.
 arity(Name, 1) :- memberchk(Name, [neg,percent,sin,cos,tan,asin,acos,atan,
     sinh,cosh,tanh,asinh,acosh,atanh,ln,log,log2,exp,sqrt,cbrt,abs,
-    floor,ceil,round,fact,recip,deg,rad]).
-arity(Name, 2) :- memberchk(Name, [add,sub,mul,div,pow,root,mod,ncr,npr,gcd,lcm,atan2,logn]).
-arity(Name, N) :- memberchk(Name, [sum,mean,median,min,max,stdev,variance,hypot]), between(1,64,N).
+    floor,ceil,round,fact,recip,deg,rad,det,transpose,norm,
+    unit_m,unit_cm,unit_km,unit_s,unit_ms,unit_seconds,unit_kg,unit_g]).
+arity(Name, 2) :- memberchk(Name, [add,sub,mul,div,pow,root,mod,ncr,npr,gcd,lcm,atan2,logn,dot,matmul]).
+arity(Name, N) :- memberchk(Name, [array,sum,mean,median,min,max,stdev,variance,hypot]), between(1,64,N).
 
 check_line(Line, Depth, Next) :-
     split_string(Line, " ", " \r\t", Parts),

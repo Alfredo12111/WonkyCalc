@@ -1,16 +1,8 @@
-import { spawn } from "node:child_process";
+import { runProcess } from "./process.mjs";
+export { runProcess };
 import { existsSync, readFileSync } from "node:fs";
-import {
-  mkdtemp,
-  mkdir,
-  readFile,
-  writeFile,
-  rm,
-  copyFile,
-} from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
-import { performance } from "node:perf_hooks";
 
 export const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const localFile = path.join(ROOT, "runtime.local.json");
@@ -32,6 +24,12 @@ export const runtimes = {
   python: process.env.WONKYCALC_PYTHON || local.python || "python",
   j: resolve("j", ".runtimes/j/j64/jconsole.exe"),
   red: resolve("red", ".runtimes/red.exe"),
+  factor: resolve("factor", ".runtimes/factor/factor/factor.exe"),
+  rexx: resolve("rexx", ".runtimes/rexx/rexx.exe"),
+  bqn: resolve("bqn", ".runtimes/bqn/bqn/BQN.exe"),
+  mercury: resolve("mercury", ".cache/bin/units.exe"),
+  eiffel: resolve("eiffel", ".cache/bin/contracts.exe"),
+  icon: resolve("icon", ".cache/bin/explain.exe"),
 };
 
 export const stages = [
@@ -65,7 +63,7 @@ export const stages = [
     role: "Plan",
     description: "Builds a named execution plan for the numeric engine.",
     file: "plan.tcl",
-    output: "plan.ijs",
+    output: "nodes.tsv",
   },
   {
     id: "j",
@@ -84,56 +82,58 @@ export const stages = [
     output: "formatted.txt",
   },
 ];
-
-function command(stage, directory) {
-  // Rebol's Windows CLI splits absolute script paths containing spaces.
-  // Every worker is copied into the isolated cwd, so a basename is sufficient.
-  const file = stage.file;
-  if (stage.id === "prolog") return [runtimes.prolog, ["-q", "-f", file]];
-  if (stage.id === "tcl")
-    return runtimes.tcl
-      ? [runtimes.tcl, [file]]
-      : [runtimes.python, [path.join(ROOT, "scripts/tcl-host.py"), file]];
-  if (stage.id === "j") return [runtimes.j, ["-jprofile", file]];
-  if (stage.id === "rebol") return [runtimes.rebol, ["-s", "--quiet", file]];
-  return [runtimes[stage.id], [file]];
-}
-
-export function runProcess(exe, args, cwd, signal, timeout = 12000) {
-  return new Promise((resolve, reject) => {
-    const child = spawn(exe, args, {
-      cwd,
-      windowsHide: true,
-      stdio: ["pipe", "pipe", "pipe"],
-      signal,
-    });
-    child.stdin.on("error", () => {});
-    child.stdin.end();
-    let output = "";
-    const timer = setTimeout(() => {
-      child.kill();
-      reject(
-        new Error(`The language worker timed out. ${output.slice(-1000)}`),
-      );
-    }, timeout);
-    child.stdout.on("data", (b) => {
-      output = (output + b).slice(-4000);
-    });
-    child.stderr.on("data", (b) => {
-      output = (output + b).slice(-4000);
-    });
-    child.on("error", (e) => {
-      clearTimeout(timer);
-      reject(e);
-    });
-    child.on("close", (code) => {
-      clearTimeout(timer);
-      code === 0
-        ? resolve(output)
-        : reject(new Error(output || `Worker exited with code ${code}.`));
-    });
-  });
-}
+stages.splice(3, 0, {
+  id: "mercury",
+  name: "Mercury",
+  role: "Check units",
+  description: "Checks dimensions before numbers travel any further.",
+  file: "units.m",
+  output: "units.txt",
+});
+stages.splice(5, 0, {
+  id: "eiffel",
+  name: "Eiffel",
+  role: "Enforce contracts",
+  description: "Checks shapes, domains and finite results.",
+  file: "contracts/contracts.e",
+  output: "contracts.txt",
+});
+stages.splice(
+  7,
+  0,
+  {
+    id: "bqn",
+    name: "BQN",
+    role: "Array math",
+    description: "Calculates vectors and matrices, and audits scalar results.",
+    file: "array.bqn",
+    output: "array-result.txt",
+  },
+  {
+    id: "factor",
+    name: "Factor",
+    role: "Second opinion",
+    description: "Independently evaluates supported scalar expressions.",
+    file: "check.factor",
+    output: "factor.txt",
+  },
+  {
+    id: "rexx",
+    name: "Rexx",
+    role: "Decimal audit",
+    description: "Recomputes supported expressions with 50 decimal digits.",
+    file: "decimal.rexx",
+    output: "rexx.txt",
+  },
+);
+stages.push({
+  id: "icon",
+  name: "Icon",
+  role: "Explain",
+  description: "Turns real handoffs into a readable calculation receipt.",
+  file: "explain.icn",
+  output: "explanation.txt",
+});
 
 export async function health() {
   let tcl = false;
@@ -169,6 +169,9 @@ export function validateRequest(input) {
     throw new Error("Angle mode must be DEG or RAD.");
   if (![6, 10, 12, 14].includes(input.precision ?? 12))
     throw new Error("Unsupported display precision.");
+  for (const option of ["homework", "perOperation", "unnecessary"])
+    if (input[option] !== undefined && typeof input[option] !== "boolean")
+      throw new Error(`${option} must be true or false.`);
   const ans = String(input.ans ?? "0");
   if (
     !/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(ans) ||
@@ -184,87 +187,6 @@ export function validateRequest(input) {
 }
 
 export async function calculate(input, onEvent = () => {}, signal) {
-  const request = validateRequest(input);
-  const cache = path.join(ROOT, ".cache", "jobs");
-  await mkdir(cache, { recursive: true });
-  const directory = await mkdtemp(path.join(cache, "calc-"));
-  const trace = [];
-  const started = performance.now();
-  try {
-    await writeFile(
-      path.join(directory, "request.txt"),
-      request.expression,
-      "utf8",
-    );
-    await writeFile(
-      path.join(directory, "context.txt"),
-      `${request.mode}\n${request.ans}\n${request.precision}\n`,
-      "utf8",
-    );
-    for (const stage of stages) {
-      const at = performance.now();
-      onEvent({ type: "stage", id: stage.id, status: "running" });
-      try {
-        await copyFile(
-          path.join(ROOT, "workers", stage.file),
-          path.join(directory, stage.file),
-        );
-        const [exe, args] = command(stage, directory);
-        await runProcess(exe, args, directory, signal);
-        const output = (
-          await readFile(path.join(directory, stage.output), "utf8")
-        ).trim();
-        if (!output)
-          throw new Error("The language worker returned an empty result.");
-        const entry = {
-          id: stage.id,
-          name: stage.name,
-          role: stage.role,
-          ms: Math.round((performance.now() - at) * 10) / 10,
-          output,
-          status: "complete",
-        };
-        trace.push(entry);
-        onEvent({ type: "stage", ...entry });
-      } catch (error) {
-        let message;
-        try {
-          message = (
-            await readFile(path.join(directory, "error.txt"), "utf8")
-          ).trim();
-        } catch {}
-        message ||=
-          error.code === "ENOENT"
-            ? `${stage.name} is not installed. Run npm run setup, then npm run doctor.`
-            : `${stage.name} could not complete this calculation. ${error.message.slice(0, 300)}`;
-        onEvent({
-          type: "stage",
-          id: stage.id,
-          status: "error",
-          message,
-          ms: Math.round(performance.now() - at),
-        });
-        const failure = new Error(message);
-        failure.trace = trace;
-        failure.stage = stage.id;
-        throw failure;
-      }
-    }
-    const raw = (
-      await readFile(path.join(directory, "result.txt"), "utf8")
-    ).trim();
-    if (!Number.isFinite(Number(raw)))
-      throw new Error("The engine returned a non-finite result.");
-    return {
-      expression: request.expression,
-      mode: request.mode,
-      precision: request.precision,
-      raw,
-      result: trace.at(-1).output,
-      trace,
-      ms: Math.round(performance.now() - started),
-    };
-  } finally {
-    await rm(directory, { recursive: true, force: true, maxRetries: 3 });
-  }
+  const { journey } = await import("./pipeline.mjs");
+  return journey(input, onEvent, signal);
 }

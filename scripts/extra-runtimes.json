@@ -1,0 +1,47 @@
+[
+  {
+    "file": "factor.zip",
+    "url": "https://github.com/factor/factor/releases/download/0.102/factor-windows-x86-64-0.102.zip",
+    "sha256": "6652B33BDD2BDC39F74DEF92F9FA03BC5658C6F263220720A3B9E42A6794F40C"
+  },
+  {
+    "file": "haxe.zip",
+    "url": "https://github.com/HaxeFoundation/haxe/releases/download/4.3.7/haxe-4.3.7-win64.zip",
+    "sha256": "29F7ACB0FB9FC66A2B9F6BD9453AF3474CCB14EBD9FD0142F351D7311C4010C9"
+  },
+  {
+    "file": "gobo.7z",
+    "url": "https://github.com/gobo-eiffel/gobo/releases/download/gobo-26.10/gobo-windows-x86_64-26.10.18%2Bc84ee2f.7z",
+    "sha256": "28B2D0F816FEF970036E328A5C421B15C024B281A839C98EAA92A39A1FCFB8FA"
+  },
+  {
+    "file": "bqn.zip",
+    "url": "https://github.com/vylsaz/cbqn-win-docker-build/releases/download/cbqn-0.12.0/cbqn-ucrt-x86_64.zip",
+    "sha256": "AD5A1503A0E847CAD30253BECF42013A96ECE51A8ACDE7053EE9E9A3F97C6F6C"
+  },
+  {
+    "file": "unicon.exe",
+    "url": "https://github.com/uniconproject/unicon/releases/download/13.2/setup-unicon_13.2_6224_16bebbfd.64-bit.exe",
+    "sha256": "79E41679F4570455FA52B6A9927586B962D3A337F98DB637B5019C139EFD091A"
+  },
+  {
+    "file": "innoextract.zip",
+    "url": "https://github.com/dscharrer/innoextract/releases/download/1.9/innoextract-1.9-windows.zip",
+    "sha256": "6989342C9B026A00A72A38F23B62A8E6A22CC5DE69805CF47D68AC2FEC993065"
+  },
+  {
+    "file": "regina-source.zip",
+    "url": "https://github.com/0branch/regina/archive/9ad07276c9846f0f23a27512eabca1cc8a7b857b.zip",
+    "sha256": "ACB2F8FCCF3B0E8CAE752D6175B3BC807640F77B2AB3B0F0856E165DB3DFBF75"
+  },
+  {
+    "file": "mercury.tar.xz",
+    "url": "https://dl.mercurylang.org/release/mercury-srcdist-22.01.9.tar.xz",
+    "sha256": "7D58B10D81D6F2E4E9858B48B335D920D8FFF5AF91AC8B4907F127A05F54C462"
+  },
+  {
+    "file": "msys2-stable.tar.xz",
+    "url": "https://github.com/msys2/msys2-installer/releases/download/2026-09-27/msys2-base-x86_64-20260927.tar.xz",
+    "sha256": "EA2F31A0B6ADE63914CE441FFB022F0F6AA96982BFEFA2326460A26D5FB01322"
+  }
+]

@@ -1,4 +1,5 @@
 $ErrorActionPreference = 'Stop'
+Import-Module (Join-Path $PSHOME 'Modules/Microsoft.PowerShell.Utility/Microsoft.PowerShell.Utility.psd1') -Force
 $project = Split-Path $PSScriptRoot -Parent
 $cache = Join-Path $project '.cache'
 $runtime = Join-Path $project '.runtimes'
@@ -15,7 +16,7 @@ foreach ($download in $downloads) {
     $destination = Join-Path $cache $download.File
     if (!(Test-Path -LiteralPath $destination)) {
         Write-Host "Downloading $($download.File)..."
-        Invoke-WebRequest -Uri $download.Url -OutFile "$destination.partial"
+        Invoke-WebRequest -UseBasicParsing -Uri $download.Url -OutFile "$destination.partial"
         Move-Item -LiteralPath "$destination.partial" -Destination $destination
     }
     $actual = (Get-FileHash -LiteralPath $destination -Algorithm SHA256).Hash

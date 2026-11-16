@@ -34,6 +34,7 @@ if (!(Test-Path '.runtimes\prolog\bin\swipl.exe')) {
     & $extractor x '.cache\swipl.exe' '-o.runtimes\prolog' -y -bso0
     if ($LASTEXITCODE -ne 0) { throw 'SWI-Prolog extraction failed.' }
 }
+& (Join-Path $PSScriptRoot 'setup-extra.ps1')
 Write-Host 'Checking every runtime...'
 node scripts/doctor.mjs
 if ($LASTEXITCODE -ne 0) { throw 'A runtime did not pass the smoke test. See the error above.' }

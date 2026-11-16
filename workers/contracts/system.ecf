@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<system xmlns="http://www.eiffel.com/developers/xml/configuration-1-23-0" name="contracts" uuid="754417F5-3292-48DF-AFC6-C91CF32C4375">
+  <target name="contracts">
+    <root class="CONTRACTS" feature="make"/>
+    <option warning="true" void_safety="none">
+      <assertions precondition="true" postcondition="true" check="true" invariant="true" loop="true" supplier_precondition="true"/>
+    </option>
+    <setting name="console_application" value="true"/>
+    <library name="base" location="$GOBO/library/free_elks/library.ecf"/>
+    <cluster name="app" location="."/>
+  </target>
+</system>

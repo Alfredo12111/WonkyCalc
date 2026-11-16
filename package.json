@@ -1,13 +1,14 @@
 {
   "name": "wonkycalc",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
-  "description": "One scientific calculator. Six languages. Absolutely necessary.",
+  "description": "One scientific calculator. Thirteen languages. Absolutely necessary.",
   "type": "module",
   "scripts": {
     "start": "node server.mjs",
     "test": "node --test --test-concurrency=1 tests/*.test.mjs",
     "doctor": "node scripts/doctor.mjs",
+    "build": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build.ps1",
     "setup": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/setup-windows.ps1"
   },
   "engines": {
