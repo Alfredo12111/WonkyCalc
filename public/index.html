@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>WonkyCalc — Six languages. One answer.</title>
+    <meta
+      name="description"
+      content="An unnecessarily polyglot scientific calculator, powered by Prolog, Raku, Tcl, Red, J, and Rebol. Watch every calculation happen."
+    />
+    <link rel="icon" href="/favicon.svg" />
+    <link rel="stylesheet" href="/style.css" />
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <div class="shell">
+      <header class="topbar">
+        <a class="brand" href="/" aria-label="WonkyCalc home"
+          ><img src="/favicon.svg" alt="" width="36" height="36" /><span
+            >WonkyCalc<span class="brand-dot">.</span></span
+          ><span class="version">v1.0</span></a
+        >
+        <div class="top-right">
+          <span class="runtime-status" id="runtime-status"
+            ><i></i> Checking the engines</span
+          ><button class="quiet-button" id="help-open">
+            Quick guide <span>↗</span>
+          </button>
+        </div>
+      </header>
+      <main>
+        <section class="intro">
+          <div>
+            <div class="eyebrow"><span></span> UNNECESSARILY POLYGLOT</div>
+            <h1>Serious math.<br /><span>Questionable architecture.</span></h1>
+            <p>
+              A scientific calculator powered by six languages.<br
+                class="mobile-break"
+              />
+              Because one would have been reasonable.
+            </p>
+          </div>
+          <div class="intro-stamp">
+            <span>6</span>
+            <div>LANGUAGES<br />ONE ANSWER</div>
+          </div>
+        </section>
+        <div class="workspace">
+          <section class="calculator" aria-label="Scientific calculator">
+            <div class="calc-toolbar">
+              <div class="calc-title">
+                <span class="small-spark">✳</span> SCIENTIFIC
+              </div>
+              <div class="toolbar-controls">
+                <select id="precision" aria-label="Display precision">
+                  <option value="6">6 digits</option>
+                  <option value="10">10 digits</option>
+                  <option value="12" selected>12 digits</option>
+                  <option value="14">14 digits</option>
+                </select>
+                <div class="angle-control" role="group" aria-label="Angle mode">
+                  <button id="deg" class="active" aria-pressed="true">
+                    DEG</button
+                  ><button id="rad" aria-pressed="false">RAD</button>
+                </div>
+              </div>
+            </div>
+            <div class="display">
+              <div class="display-meta">
+                <span id="expression-label">YOUR EXPRESSION</span
+                ><button
+                  id="copy"
+                  title="Copy the current answer"
+                  aria-label="Copy answer"
+                >
+                  Copy <span>⧉</span>
+                </button>
+              </div>
+              <label for="expression" class="sr-only"
+                >Mathematical expression</label
+              ><input
+                id="expression"
+                type="text"
+                inputmode="text"
+                autocomplete="off"
+                spellcheck="false"
+                maxlength="1024"
+                placeholder="Type a little math…"
+                aria-describedby="input-hint"
+              />
+              <div class="answer-line">
+                <span class="equals-sign">=</span
+                ><output id="answer" aria-live="polite">0</output>
+              </div>
+              <div class="display-bottom">
+                <span id="input-hint"
+                  >Enter an expression or use the keys below</span
+                ><span id="memory-indicator" hidden>M</span
+                ><span class="real-label">REAL NUMBERS</span>
+              </div>
+            </div>
+            <div class="key-area">
+              <div
+                class="function-tabs"
+                role="tablist"
+                aria-label="Function category"
+              >
+                <button
+                  role="tab"
+                  id="tab-scientific"
+                  aria-selected="true"
+                  class="active"
+                  data-tab="scientific"
+                >
+                  Scientific</button
+                ><button
+                  role="tab"
+                  id="tab-trig"
+                  aria-selected="false"
+                  data-tab="trig"
+                >
+                  Trigonometry</button
+                ><button
+                  role="tab"
+                  id="tab-stats"
+                  aria-selected="false"
+                  data-tab="stats"
+                >
+                  Statistics
+                </button>
+              </div>
+              <div
+                id="function-keys"
+                class="function-keys"
+                role="tabpanel"
+                aria-labelledby="tab-scientific"
+              ></div>
+              <div class="key-divider"></div>
+              <div class="main-keys" id="main-keys"></div>
+              <div class="memory-row">
+                <span>MEMORY</span
+                ><button data-memory="clear" title="Clear memory">MC</button
+                ><button data-memory="recall" title="Recall memory">MR</button
+                ><button data-memory="store" title="Store answer in memory">
+                  MS</button
+                ><button
+                  data-memory="add"
+                  title="Add answer to memory using all six languages"
+                >
+                  M+</button
+                ><button
+                  data-memory="subtract"
+                  title="Subtract answer from memory using all six languages"
+                >
+                  M−</button
+                ><span class="keyboard-hint">↵ to calculate</span>
+              </div>
+            </div>
+            <div class="calculator-foot">
+              <span><i></i> Real runtimes. Real calculations.</span
+              ><span id="calculation-time">Ready when you are.</span>
+            </div>
+          </section>
+          <aside class="trace-panel" aria-label="Language activity sidebar">
+            <div class="panel-heading">
+              <div>
+                <span class="eyebrow">UNDER THE HOOD</span>
+                <h2>The scenic route<span>.</span></h2>
+              </div>
+              <span class="live-tag"><i></i> LIVE</span>
+            </div>
+            <p class="trace-intro">
+              Follow your math through all six languages.
+            </p>
+            <div class="trace-summary">
+              <span id="trace-label">Waiting for an expression</span
+              ><strong id="trace-count">0 / 6</strong>
+            </div>
+            <div class="trace-progress"><span id="trace-progress"></span></div>
+            <div id="language-list" class="language-list"></div>
+            <div class="trace-bottom">
+              <span class="route-icon">↳</span>
+              <p id="trace-note">
+                Press <strong>=</strong> to take the long way to the right
+                answer.
+              </p>
+            </div>
+          </aside>
+        </div>
+        <section class="bottom-section">
+          <div class="examples">
+            <div class="section-label">TAKE IT FOR A SPIN <span>↗</span></div>
+            <div class="example-list">
+              <button data-example="sin(30)^2 + cos(30)^2" data-mode="DEG">
+                <span>Trig identity</span><code>sin(30)² + cos(30)²</code
+                ><b>↗</b></button
+              ><button data-example="ncr(52,5)">
+                <span>Poker possibilities</span><code>ncr(52, 5)</code
+                ><b>↗</b></button
+              ><button data-example="stdev(4,8,15,16,23,42)">
+                <span>A little statistics</span
+                ><code>stdev(4, 8, 15, 16, 23, 42)</code><b>↗</b>
+              </button>
+            </div>
+          </div>
+          <section class="history" aria-label="Calculation history">
+            <div class="section-label">
+              RECENT CALCULATIONS <button id="clear-history">Clear</button>
+            </div>
+            <div id="history-list">
+              <p class="history-empty">
+                Your next questionable journey starts above.
+              </p>
+            </div>
+          </section>
+        </section>
+      </main>
+      <footer>
+        <span>Built with Prolog, Raku, Tcl, Red, J &amp; Rebol.</span
+        ><span>Six languages. One answer. Absolutely necessary.</span>
+      </footer>
+    </div>
+    <div id="toast" role="status" class="toast" hidden></div>
+    <dialog id="guide">
+      <form method="dialog">
+        <button class="dialog-close" aria-label="Close guide">×</button>
+      </form>
+      <span class="eyebrow">A SMALL FIELD GUIDE</span>
+      <h2>Meet your overqualified calculator.</h2>
+      <p>
+        Type expressions normally, then press <strong>Enter</strong> or
+        <strong>=</strong>. Every successful calculation really runs through all
+        six languages. Open any completed language row to see what it produced.
+      </p>
+      <dl>
+        <dt>Scientific</dt>
+        <dd>
+          <code>sqrt(81)</code>, <code>2^10</code>, <code>5!</code>,
+          <code>ln(e)</code>, <code>log(100)</code>, <code>logn(8,2)</code>,
+          <code>root(27,3)</code>, <code>ncr(52,5)</code>
+        </dd>
+        <dt>Trigonometry</dt>
+        <dd>
+          <code>sin</code>, <code>cos</code>, <code>tan</code> and their
+          inverses use the selected DEG/RAD mode. Hyperbolic functions always
+          use dimensionless arguments.
+        </dd>
+        <dt>Statistics</dt>
+        <dd>
+          Comma-separated arguments: <code>mean(2,4,6)</code>,
+          <code>median(3,1,8)</code>, <code>stdev(1,2,3)</code>,
+          <code>variance(1,2,3)</code>. Standard deviation and variance are
+          <strong>population</strong> statistics. Maximum 64 arguments.
+        </dd>
+        <dt>Small print, actual math</dt>
+        <dd>
+          Use explicit multiplication: <code>2*pi</code>. Exponents are
+          right-associative; <code>-2^2 = -4</code>. Postfix
+          <code>%</code> divides by 100, so <code>200+10% = 200.1</code>.
+          <code>mod(a,b)</code> is modulo. <code>atan2(y,x)</code> follows that
+          argument order.
+        </dd>
+        <dt>Precision & limits</dt>
+        <dd>
+          Real-number arithmetic with roughly 15–16 significant digits
+          internally. Display rounding does not change Ans or stored memory.
+          Factorials and combinatorics accept integers through 170. Complex
+          numbers, symbolic algebra, and graphing are outside this version.
+        </dd>
+        <dt>Keyboard & memory</dt>
+        <dd>
+          Enter calculates, Escape clears. <code>ans</code> recalls the
+          full-precision last answer. MS stores it, MR inserts memory, and M+/M−
+          run a new six-language calculation. History and memory stay in this
+          browser.
+        </dd>
+      </dl>
+    </dialog>
+  </body>
+</html>
