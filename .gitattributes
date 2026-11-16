@@ -1,20 +1,25 @@
 * text=auto
-*.raku text eol=lf
-*.reb text eol=lf
-*.red text eol=lf
-*.pl text eol=lf
-*.tcl text eol=lf
-*.ijs text eol=lf
+*.raku text eol=lf linguist-language=Raku linguist-detectable=true
+*.reb text eol=lf linguist-language=Rebol linguist-detectable=true
+*.red text eol=lf linguist-language=Red linguist-detectable=true
+*.pl text eol=lf linguist-language=Prolog linguist-detectable=true
+*.tcl text eol=lf linguist-language=Tcl linguist-detectable=true
+*.ijs text eol=lf linguist-language=J linguist-detectable=true
 *.mjs text eol=lf
 *.js text eol=lf
 *.cmd text eol=crlf
 *.jpg binary
-public/app.js linguist-generated=true
-*.hx text eol=lf
-*.bqn text eol=lf
-*.factor text eol=lf
-*.rexx text eol=lf
+*.hx text eol=lf linguist-language=Haxe linguist-detectable=true
+*.bqn text eol=lf linguist-language=BQN linguist-detectable=true
+*.factor text eol=lf linguist-language=Factor linguist-detectable=true
+*.rexx text eol=lf linguist-language=REXX linguist-detectable=true
+# Icon is not in Linguist's language catalog; document it in the README.
 *.icn text eol=lf
-*.e text eol=lf
-*.m linguist-language=Mercury text eol=lf
+*.e text eol=lf linguist-language=Eiffel linguist-detectable=true
+*.m text eol=lf linguist-language=Mercury linguist-detectable=true
 *.sh text eol=lf
+
+# Authored source is counted; the Haxe compiler output is not counted twice.
+frontend/** linguist-generated=false
+workers/** linguist-generated=false
+public/app.js linguist-generated=true
